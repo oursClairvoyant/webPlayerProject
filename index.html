@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+  <html>
+    <head >
+      <meta charset="UTF-8">
+      <title>55RCP</title>
+      <link rel="stylesheet" href="./css/style.css">
+      <link rel="icon" href="./img/55RCIco.ico" />
+      <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+      <script src="./scripts/webplayer.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.1.2/howler.core.min.js"></script>
+      <script
+  src="https://code.jquery.com/jquery-2.2.4.js"
+  integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI="
+  crossorigin="anonymous"></script>
+
+    </head>
+    <body>
+    <div id="bg">
+      <div id="fadelayer"></div>
+        <img src="./img/covercaravan.jpg"/>
+
+
+    </div>
+
+
+    <div id="main">
+
+      <div id="image">
+        <img src="./img/covercaravan.jpg"/>
+      </div>
+      <div id="player">
+        <div id="songTitle">Demo</div>
+               <div id="buttons">
+                   <button id="pre" onclick="prevS()"><img src="./img/Pre.png" height="90%" width="90%"/></button>
+                   <button id="play" onclick="playP()"><img src="./img/Play.png"/></button>
+                   <button id="next" onclick="nextS()"><img src="./img/Next.png" height="90%" width="90%"/></button>
+                   <input id = "volumeSlider" type = "range" min = "0" max = "1" step = "0.001" onchange = "manageVolume()"/>
+                   <img id="volumeImg"src="./img/audio-add-16.ico"/>
+               </div>
+               <input id = "songSlider" type = "range" min = "0" step = "1" onchange = "seekSong()"/>
+               <!--<div id="seek-bar">
+                   <div id="fill"></div>
+                   <div id="handle"></div>
+              </div>-->
+
+                <ul id = "timeline">
+                  <li id="currentTime">0:00</li>
+                  <li id="totalTime">0:00</li>
+                </ul>
+
+
+      </div>
+    </div>
+    <a id="logo" href="#home" ><img src="./img/55RC.png"></img></a>
+
+
+    <div id="toggle" onclick="openSidebar()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div id="tracks">
+
+        <span id="closeSidebar" onclick="toggl()">&times</span>
+
+        <h4>TRACKS</h4>
+        <ul id="tracklist"></ul>
+    </div>
+
+
+
+
+
+
+
+
+
+
+    </body>
+    <script>
+    var songTitle = document.getElementById( 'songTitle' );
+    var fillBar = document.getElementById("fill");
+    var currentTime =  document.getElementById( 'currentTime' );
+    var totalTime =  document.getElementById( 'totalTime' );
+    var volumeSlider = document.getElementById( 'volumeSlider' );
+    var songSlider = document.getElementById( 'songSlider' );
+    var songs = [ './music/Caravan Palace - Lone Digger.mp3',"./music/Arys - It's Alright.mp3","./music/04 BLOOM - Just Lay Down.mp3",
+                  "./music/Koven - Love Wins Again.mp3","./music/Aimer - Through My Blood.mp3","./music/02. 작은 것들을 위한 시 (Boy with Luv) feat. Halsey.mp3",
+                  "./music/Shonan No Kaze - Grand Blue.mp3","./music/Silhouette - Bad Computer_ Skyelle.mp3","./music/Breaknoise - Weigh Me Down (ft. Holly Drummond).mp3",
+                  "./music/Future - Government Official.mp3","./music/Madeon - All My Friends.mp3","./music/Tristam - Questions.mp3","./music/Enkidu - Falling (Embody Remix).mp3",
+                  "./music/Foster The People - Imagination.mp3","./music/Uppermost X Juani - Pure.mp3","./music/Hans Zimmer - A Way Of Life.mp3","./music/Money In The Grave - Drake_Rick Ross.mp3","./music/Monsta X - Alligator.mp3","./music/Chop - Loyalty Means Everything.mp3"];
+    var songCover = [ "./img/covercaravan.jpg", "./img/arys.jpg", "./img/bloom.jpg", "./img/lovewins.jpg", './img/aimer.jpg','./img/boywith.jpg','./img/cover.jpg','./img/silhouette.jpg',
+                      './img/breaking.jpg','./img/government.jpg','./img/friends.jpg','./img/questions.jpg','./img/enkidu.jpg','./img/foster.jpg','./img/pure.jpg','./img/samurai.jpg','./img/drake.jpg','./img/monsta.png','./img/chop.png'];
+    var currentSong = 0 ;
+    var tracklist =  document.getElementById( 'tracklist' );
+    var songIndex = 0;
+    var music = new Audio();
+    volumeSlider.value = 0.05;
+    music.volume = 0.05;
+    window.onload = playSong;
+    songs.forEach( function ( song ) {
+      var li = document.createElement( 'li' );
+      var temp = strToReg( song );
+      tracklist.appendChild( li );
+      li.innerHTML += "<br>"+"<a onclick = 'playSongOnClick("+songIndex+")'>"+temp+"</a>"+"</br>";
+      songIndex++;
+    });
+   function convertTime( seconds ){
+    var min = Math.floor(seconds / 60);
+    var sec = seconds % 60;
+    min = (min < 10) ? "0" + min : min;
+    sec = ( sec < 10 ) ? "0" + sec:sec;
+    currentTime.textContent = min + ":" + sec;
+    }
+    function totalu( seconds ){
+      var max = Math.floor( music.duration );
+      var min = Math.floor( seconds/60 );
+      var sec = seconds % 60;
+      min = ( min < 10 ) ? "0" + min : min;
+      sec = ( sec < 10 ) ? "0" + sec:sec;
+      totalTime.textContent = min + ":" + sec;
+      songSlider.setAttribute( "max", max );
+    }
+    function strToReg( str ){
+        var titleToStr = str;
+        var regex1 = /.\/music\//gi;
+        var regex2 = /.mp3/gi;
+        titleToStr = titleToStr.replace( regex1, '' );
+        titleToStr = titleToStr.replace( regex2, '' );
+        return titleToStr;
+    }
+    setInterval( updateSongSlider, 1000 );
+    function updateSongSlider(){
+      var aya = music.currentTime / music.duration;
+      var c = Math.round( music.currentTime );
+      songSlider.value = c;
+      convertTime( c );
+      totalu( Math.round( music.duration ) );
+      if( music.ended ){
+         nextS();
+      }
+    }
+    function playSongOnClick( chosenSong ){
+      currentSong = chosenSong;
+      playSong();
+      $( "#play img" ).attr("src", "./img/Pause.png" );
+      $( "#image img" ).attr( "src", songCover[ currentSong ] );
+      $( "#bg img" ).attr( "src", songCover[ currentSong ] );
+    }
+    function playSong(){
+      music.src = songs[ currentSong ];
+      songTitle.textContent = strToReg( songs[ currentSong ] );
+      music.play();
+    }
+    function playP(){
+      if( music.paused ) {
+        music.play();
+        $( "#play img" ).attr( "src", "./img/Pause.png" );
+      }else{
+        music.pause();
+        $( "#play img" ).attr( "src", "./img/Play.png" );
+      }
+    }
+    function nextS(){
+      ++currentSong;
+      if (currentSong > songs.length - 1) {
+        currentSong = 0;
+      }
+      playSong();
+      $( "#play img" ).attr( "src", "./img/Pause.png" );
+      $( "#image img" ).attr("src", songCover[ currentSong ] );
+      $( "#bg img" ).attr( "src", songCover[ currentSong ] );
+    }
+    function prevS(){
+      --currentSong;
+      if ( currentSong  <  0  ){
+        currentSong = songs.length - 1;
+      }
+      playSong();
+      $( "#play img" ).attr( "src", "./img/Pause.png" );
+      $( "#image img" ).attr( "src",songCover[ currentSong ] );
+      $( "#bg img" ).attr( "src",songCover[ currentSong ] );
+    }
+    function manageVolume(){
+      music.volume = volumeSlider.value;
+    }
+    function seekSong(){
+
+      music.currentTime = songSlider.value;
+    }
+    function toggl(){
+      document.getElementById( 'tracks' ).style.width = "0";
+      document.getElementById( 'toggle' ).style.left = '97vw';
+      document.getElementById('closeSidebar').style.visibility = "hidden";
+
+
+
+    }
+    function openSidebar(){
+      document.getElementById('tracks').style.width = "20vw";
+      document.getElementById('toggle').style.left = '75vw';
+      document.getElementById('closeSidebar').style.visibility = "visible";
+
+
+
+    }
+
+
+
+
+
+
+
+
+</script>
+
+
+
+
+
+  </html>
